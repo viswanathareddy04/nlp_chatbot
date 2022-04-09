@@ -22,6 +22,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.linear_model import LogisticRegression
 
 
+studentid =""
 
 def LemTokens(tokens):
     return [lemmer.lemmatize(token) for token in tokens]
@@ -57,14 +58,20 @@ def bot_initialize(update, context):
         
         user_intent = intent(user_response)
         
-        if(user_intent != 'goodbye'):
+        if(user_intent != 'goodbye' or user_intent != 'studentid' ):
             if(user_response == '/start'):
-                resp = """Hi! Here You can get suggestion of what type of Flowers you can give on a particular occasion.\nType Bye to Exit."""
+                resp = """Hi! Here is what I can do!!! 1. I can give you your Grades \n 2. College Fee \n  3. Exam Dates.\n\n 4. or Type Bye to Exit."""
+                update.message.reply_text(resp)
+                return
+
+            elif (user_intent == 'greetings'):
+                resp = str(random.choice(responses[0]['response'])) + ", Before we start, can I get your student ID please? ex: C0XXXXXX"
                 update.message.reply_text(resp)
                 return
             
-            elif (user_intent == 'greetings'):
-                resp = str(random.choice(responses[0]['response'])) + ", How may I help you?"
+            if (user_intent == 'studentid'):
+                resp = str(random.choice(responses[1]['response'])) + userDict.get(user_msg,default="C01")
+                studentid = userDict.get(user_msg,default="C01")
                 update.message.reply_text(resp)
                 return
         
@@ -109,8 +116,14 @@ def main():
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logging.basicConfig(stream=sys.stdout, level =logging.INFO)
+    userDict = {
+        "C01": "John",
+        "C02": "Dan",
+        "C03": "Michelle",
+        "C04": "Rosi"
+    }
     data = [["Hi",0],["Hello",0],["Hey",0],["Heya",0],
-        ["Can you suggest some flowers.",1],["Is flowers available?",1],["Is bouquet available?",1],["Are flowers fresh?",1],
+        ["C02",1],["C01",1],["C03",1],["C04",1],
         ["Suggest for birthday",2],["For Birthday",2],["I want some flowers for Birthday",2],["What type of flowers to give on Birthday?",2],["Suggest something for Birthday",2],["I want to give it to someone for Birthday",2],        
         ["Suggest for anniversary",3],["For Anniversary",3],["I want some flowers for Anniversary",3],["What type of flowers to give on Anniversary?",3],["Suggest something for Anniversary",3],["I want to give it to someone for Anniversary",3],
         ["Suggest for congratulations",4],["For Congratulations",4],["I want some flowers for Congratulating someone",4],["What type of flowers to give for Congratulations?",4],["Suggest something for Congratulations",4],["I want to give it to someone for Congratulating them",4],
@@ -125,7 +138,7 @@ if __name__ == "__main__":
 
 
     responses = {0 : {"intent":"greetings","response":['Hi Dear','Hi','Hello', 'Nice to see you',]}, 
-      1 : {"intent":"availability","response":['Yes it is available and I can suggest you some.','Yes it is fresh and available']},
+      1 : {"intent":"studentid","response":['Welcome to Lambton',]},
       2 : {"intent":"flowers","response":['Endearing Red Roses','Sunshine Yellow Roses','Extravagant 40 Red Roses']},
       3 : {"intent":"flowers","response":['Lillies & Roses Elegant','15 Regal Carnations','Purple Orchids']},
       4 : {"intent":"flowers","response":['Purple Orchids','Yellow Asiatic Lillies','Dark Pink Roses']},
