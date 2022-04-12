@@ -1,10 +1,12 @@
 import logging
+import sys
+
+import pandas as pd
+
 from bot_responses import BotResponses
 from lambton_AIML_Bot import LambtonBot
-import  pandas as pd
-from nltk_process import NLTKProcess
+from nltk_process import NLTK_Process
 from telegram_bot import TelegramConnect
-import sys
 
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
@@ -13,8 +15,7 @@ if __name__ == "__main__":
     lambtonBot = LambtonBot()
     config = lambtonBot.readConfig('application-config.yaml')
     df = pd.DataFrame(botResponse.data, columns=["Text", "Intent"])
-    nltkprocess = NLTKProcess()
+    nltkprocess = NLTK_Process
     nltkprocess.performLogisticRegression(df)
     telegramConnect = TelegramConnect(config['telegram']['token'])
     telegramConnect.telegramPolling()
-    
