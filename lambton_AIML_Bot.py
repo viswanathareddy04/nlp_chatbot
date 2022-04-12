@@ -10,6 +10,7 @@ import random
 import string
 import sys
 from datetime import datetime as date
+
 import nltk
 import pandas as pd
 import yaml
@@ -17,40 +18,23 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from telegram.ext import Updater, MessageHandler, Filters
 
+from models import session, Student
+
 student_id = ''
 today = date.today().strftime("%A")
 print(today)
 
-student_information = {
-    "C01": {
-        "name": "John",
-        "exam": "April 14, 2022",
-        "grades": "CBD: 89%\nALML:95%",
-        "fee": "$200",
-    },
-    "C02": {
-        "name": "Dan",
-        "exam": "April 14, 2022",
-        "grades": "CBD: 90%\nALML:95%",
-        "fee": "$100",
-    },
-    "C03": {
-        "name": "Michelle",
-        "exam": "April 14, 2022",
-        "grades": "CBD: 79%\nALML:95%",
-        "fee": "$150",
-    },
-    "C04": {
-        "name": "Rosi",
-        "exam": "April 14, 2022",
-        "grades": "CBD: 84%\nALML:95%",
-        "fee": "$230",
-       
-    }
-}
+student_information = dict({s.roll_no: {
+    "name": s.name,
+    "fee": s.fee,
+    "exam": s.exam,
+    "grades": "\n".join([f"{grade.subject.name}: {grade.mark}" for grade in s.grades])
+} for s in session.query(Student).all()})
 
-subjects =   {"Monday": "Into to AI at 1:00 PM to 4.30 PM", "Tuesday": "CBD at 12:30 PM to 4.30 PM" , "Wednesday": "Python at 12:30 PM to 4.30 PM", "Thursday": "DS at 08:00 AM to 12.30 PM","Friday":"Communication at 11.30 AM to 4:00 PM", "Saturday": "No classes today", "Sunday": "No classes today"}
-
+subjects = {"Monday": "Into to AI at 1:00 PM to 4.30 PM", "Tuesday": "CBD at 12:30 PM to 4.30 PM",
+            "Wednesday": "Python at 12:30 PM to 4.30 PM", "Thursday": "DS at 08:00 AM to 12.30 PM",
+            "Friday": "Communication at 11.30 AM to 4:00 PM", "Saturday": "No classes today",
+            "Sunday": "No classes today"}
 
 
 def LemTokens(tokens):
@@ -121,13 +105,12 @@ def bot_initialize(update, context):
                                                                             exam_date=student_info.get('exam'))
                 update.message.reply_text(resp)
                 return
-            
+
             if user_intent == "time":
                 resp = str(random.choice(responses[14]['response'])).format(username=student_info.get('name'),
                                                                             class_subj=subjects.get(today))
                 update.message.reply_text(resp)
                 return
-
 
             if user_intent == 'thankyou':
                 resp = random.choice(responses[10]['response'])
@@ -170,9 +153,11 @@ if __name__ == "__main__":
         0: {"intent": "greetings", "response": ['Hi Dear', 'Hi', 'Hello', 'Nice to see you', ]},
         1: {"intent": "studentid", "response": ['Welcome to Lambton {username}!']},
         11: {"intent": "grade", "response": ['Hi {username}, your grades are as follows\n {grades}']},
-        12: {"intent": "fee", "response": ['Hi {username}, your total college_fee is {college_fee}. Please visit this URL to pay the fee https://www.lambtoncollege.ca/custom/LambtonApps/Payments/SecurePay.aspx']},
+        12: {"intent": "fee", "response": [
+            'Hi {username}, your total college_fee is {college_fee}. Please visit this URL to pay the fee https://www.lambtoncollege.ca/custom/LambtonApps/Payments/SecurePay.aspx']},
         13: {"intent": "date", "response": ['Hi {username}, your exam date is {exam_date}']},
-        14: {"intent": "time", "response": ['Hi {username}, you have {class_subj} . please use this URL to join class https://moodle.cestarcollege.com/moodle/mod/url/view.php?id=1003405']},
+        14: {"intent": "time", "response": [
+            'Hi {username}, you have {class_subj} . please use this URL to join class https://moodle.cestarcollege.com/moodle/mod/url/view.php?id=1003405']},
         9: {"intent": "goodbye", "response": ['Goodbye', 'Byebye', 'Bye', 'Have a good day']},
         10: {"intent": "thankyou",
              "response": ['You\'re welcome.', 'No problem.', 'No worries.', ' My pleasure.', 'Glad to help.']}}
