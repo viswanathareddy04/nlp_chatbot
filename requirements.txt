@@ -1,4 +1,4 @@
-spacy
+spacy 
 nltk==3.7
 numpy==1.22.3
 pandas==1.4.2
